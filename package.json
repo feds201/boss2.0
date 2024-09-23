@@ -1,0 +1,22 @@
+{
+  "name": "falconbot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@discordjs/rest": "^2.4.0",
+    "body-parser": "^1.20.3",
+    "discord-api-types": "^0.37.100",
+    "discord.js": "^14.16.2",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0"
+  }
+}
