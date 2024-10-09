@@ -1,8 +1,12 @@
 require('dotenv').config();
-const { Client, GatewayIntentBits, REST, Routes, EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle } = require('discord.js');
+const { Client, GatewayIntentBits, REST, Routes, EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle,
+    PermissionsBitField
+} = require('discord.js');
 const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs');
+const os = require("os");
+const {exec} = require("child_process");
 
 // Discord bot setup
 const client = new Client({
@@ -32,6 +36,10 @@ if (fs.existsSync(credsFilePath)) {
 
 // Register slash commands
 const commands = [
+    {
+        name: 'get_machine_ip',
+        description: 'Fetches the IP address of the machine',
+    },
     {
         name: 'status',
         description: 'Replies with The bot is working properly',
@@ -242,6 +250,30 @@ client.on('interactionCreate', async interaction => {
             const channelId = interaction.options.getString('channel_id');
             CHANNEL_ID = channelId;
             await interaction.reply(`✅ Channel ID has been set to ||${channelId}||`);        }
+        else if (commandName === 'get_machine_ip') {
+            const https = require('https');
+
+            // Fetch public IP from an external API
+            https.get('https://api.ipify.org?format=json', (resp) => {
+                let data = '';
+
+                // A chunk of data has been received
+                resp.on('data', (chunk) => {
+                    data += chunk;
+                });
+
+                // The whole response has been received
+                resp.on('end', () => {
+                    const ip = JSON.parse(data).ip;
+                    interaction.reply(`🌐 Public IP: ||${ip}||`);
+                });
+
+            }).on('error', (err) => {
+                console.error(err);
+                interaction.reply('❌ Failed to fetch the public IP');
+            });
+        }
+
         else {
             await interaction.reply('❌ Command not found');
         }
@@ -491,4 +523,4 @@ app.post('/github-webhook', (req, res) => {
     res.status(200).send('Webhook received');
 });
 
-// Start
+// StartS
