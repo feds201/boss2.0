@@ -1,10 +1,8 @@
-
 require('dotenv').config();
-const { Client, GatewayIntentBits, REST, Routes, EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle} = require('discord.js');
+const { Client, GatewayIntentBits, REST, Routes, EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle } = require('discord.js');
 const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs');
-const {Octokit} = require("@octokit/rest");
 
 // Discord bot setup
 const client = new Client({
@@ -18,7 +16,7 @@ const DISCORD_TOKEN = process.env.DISCORD_TOKEN;
 let CHANNEL_ID = process.env.CHANNEL_ID;
 const GUILD_ID = process.env.GUILD_ID;
 const CLIENT_ID = process.env.CLIENT_ID;
-const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+let octokit;
 let latestProgrammingCommit = 'No programming commits yet.'; // Store the latest programming commit
 
 // Load credentials from JSON file
@@ -87,7 +85,7 @@ const commands = [
             {
                 name: 'document_id',
                 description: 'The name of the Onshape webhook',
-                type: 3, // String type
+                type: 3, // String type,
                 required: true,
             }
         ]
@@ -97,10 +95,6 @@ const commands = [
 ];
 
 const rest = new REST({ version: '10' }).setToken(DISCORD_TOKEN);
-(async () => {
-    const { Octokit } = await import("@octokit/rest");
-    // your code using Octokit here
-})();
 
 (async () => {
     try {
@@ -116,8 +110,10 @@ const rest = new REST({ version: '10' }).setToken(DISCORD_TOKEN);
     }
 })();
 
-client.once('ready', () => {
+client.once('ready', async () => {
     console.log(`Logged in as ${client.user.tag}!`);
+    const { Octokit } = await import('@octokit/rest');
+    octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 });
 
 client.login(DISCORD_TOKEN);
@@ -391,11 +387,6 @@ app.post('/github-webhook', (req, res) => {
                 channel.send({ embeds: [prEmbed], components: [row] });
             }
         }
-
-
-
-
-
     }
     else if (event === 'issues') {
         console.log('Issue event received');
@@ -500,8 +491,4 @@ app.post('/github-webhook', (req, res) => {
     res.status(200).send('Webhook received');
 });
 
-// Start the server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
+// Start
