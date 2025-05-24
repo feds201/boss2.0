@@ -7,13 +7,15 @@ const {
     handleSetWebhook,
     handleSelfInspect,
     handleSetChannelId,
-    handleGetMachineIp
+    handleGetMachineIp,
+    handleTeamInfo
 } = require('../commands/commandHandlers');
 
 const { 
     handleRefreshStatus, 
     handleApprovePR, 
-    handleDenyPR 
+    handleDenyPR,
+    handleAIInsights
 } = require('../commands/buttonHandlers');
 
 // Main interaction handler
@@ -43,34 +45,32 @@ const handleInteraction = async (interaction) => {
                 break;
             case 'set_channel_id':
                 await handleSetChannelId(interaction);
-                break;
-            case 'get_machine_ip':
+                break;            case 'get_machine_ip':
                 await handleGetMachineIp(interaction);
+                break;
+            case 'team_info':
+                await handleTeamInfo(interaction);
                 break;
             default:
                 await interaction.reply('❌ Command not found');
                 break;
         }
-    }
-    else if (interaction.isButton()) {
+    }    else if (interaction.isButton()) {
         const { customId } = interaction;
 
         // Route to the appropriate button handler
-        switch(customId) {
-            case 'refresh_status':
-                await handleRefreshStatus(interaction);
-                break;
-            case 'approve_pr':
-                // Note: we need context for PR approval, which should be stored when creating the button
-                // This is a placeholder that would need to be updated with proper PR context
-                await handleApprovePR(interaction, null, null, null);
-                break;
-            case 'deny_pr':
-                await handleDenyPR(interaction);
-                break;
-            default:
-                console.log(`Unknown button interaction: ${customId}`);
-                break;
+        if (customId === 'refresh_status') {
+            await handleRefreshStatus(interaction);
+        } else if (customId === 'approve_pr') {
+            // Note: we need context for PR approval, which should be stored when creating the button
+            // This is a placeholder that would need to be updated with proper PR context
+            await handleApprovePR(interaction, null, null, null);
+        } else if (customId === 'deny_pr') {
+            await handleDenyPR(interaction);
+        } else if (customId.startsWith('get_ai_insights_')) {
+            await handleAIInsights(interaction);
+        } else {
+            console.log(`Unknown button interaction: ${customId}`);
         }
     }
 };

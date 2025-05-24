@@ -1,6 +1,15 @@
 // src/commands/commandHandlers.js
 const { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, PermissionsBitField } = require('discord.js');
-const { credentials, updateCredentials, CHANNEL_ID } = require('../config');
+const { credentials, updateCredentials, CHANNEL_ID         // Add formatted social media links with clickable URLs if available
+        if (tbaData.social && tbaData.social.length > 0) {
+            const { formatSocialMediaLinks } = require('../utils/apiUtils');
+            const socialLinks = formatSocialMediaLinks(tbaData.social);
+            
+            teamInfoEmbed.addFields({
+                name: '🌐 Social Media Channels',
+                value: socialLinks || 'No social media channels found'
+            });
+        }ig');
 const { getLatestProgrammingCommit, getOctokit } = require('../client');
 const https = require('https');
 
@@ -12,26 +21,22 @@ const handleTeamInfo = async (interaction) => {
 
     // Defer the reply as API calls might take some time
     await interaction.deferReply();
-    
-    try {
+      try {
         const { 
             fetchTeamInfoFromTBA, 
             fetchTeamStatsFromStatbotics, 
             fetchTeamEPAHistory,
             getAIInsights,
             formatWinRateBar,
-            generateEPAGraph,
-            formatSocialMediaLinks
-        } = require('../utils/apiUtils');
-        
-        // Enhanced loading embed with animation-like appearance
+            generateEPAGraph
+        } = require('../utils/apiUtils');        // Enhanced loading embed with animation-like appearance
         const loadingEmbed = new EmbedBuilder()
             .setColor('#36393F')
             .setTitle(`🔍 Scouting Team ${teamNumber}...`)
             .setDescription(
                 '```\n' +
                 '⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷\n' +
-                '⣿⣿⣿⣿⣿⣿⣿⣿⠿⠛⠉⠁⠀⠀⠀⠀⠀⠀⠈⠉⠛⠿⣿⣿⣿⣿⣿⣿⣿\n' +
+                '⣿⣿⣿⣿⣿⣿⣿⣿⠿⠛⠉⠁⠀⠀⠀⠀⠈⠉⠛⠿⣿⣿⣿⣿⣿⣿⣿\n' +
                 '⣿⣿⣿⣿⣿⠟⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠻⣿⣿⣿⣿\n' +
                 '⣿⣿⣿⡟⠁⠀⠀⠀⠀⠀⠀⢀⣠⣤⣴⣦⣄⣀⠀⠀⠀⠀⠀⠈⢻⣿⣿\n' +
                 '⣿⣿⡿⠀⠀⠀⠀⠀⠀⣠⣾⣿⣿⣿⣿⣿⣿⣿⣿⣶⡄⠀⠀⠀⠀⢿⣿\n' +
@@ -63,9 +68,7 @@ const handleTeamInfo = async (interaction) => {
             tbaPromise, 
             statboticsPromise, 
             epaHistoryPromise
-        ]);
-        
-        // Prepare the team info embed with enhanced visuals
+        ]);        // Prepare the team info embed with enhanced visuals
         const team = tbaData.team;
         const stats = statboticsData.overall;
         const currentYearStats = statboticsData.currentYear;
@@ -99,40 +102,43 @@ const handleTeamInfo = async (interaction) => {
         }
         
         // Create a more visually appealing title with team and mascot emojis
-        const embeds = [];
-
-        const mainInfoEmbed = new EmbedBuilder()
-            .setColor(embedColor) // Apply consistent color or individual colors
+        const teamInfoEmbed = new EmbedBuilder()
+            .setColor(embedColor)
             .setTitle(`🤖 Team ${team.team_number} - "${team.nickname}" ${teamRating}`)
             .setDescription(
                 `**📍 Location:** ${team.city}, ${team.state_prov}, ${team.country}\n` +
                 `**🚀 Rookie Year:** ${team.rookie_year} (${new Date().getFullYear() - team.rookie_year} years of experience)\n` +
                 `**🌐 Website:** ${team.website ? `[${team.website.replace(/^https?:\/\//, '').replace(/\/$/, '')}](${team.website})` : 'No website listed'}`
             )
-            .setThumbnail(`https://frc-avatar.firstinspires.org/avatar_${team.team_number}.png`)
-            .setTimestamp() // Perhaps on the first or last embed
-            .setFooter({ text: `Data retrieved from TBA and Statbotics as of ${new Date().toLocaleDateString()}`, iconURL: 'https://www.thebluealliance.com/images/logo_blue_background_tinythumb.gif' });
-        embeds.push(mainInfoEmbed);
+            .setThumbnail(`https://frc-avatar.firstinspires.org/avatar_${team.team_number}.png`);
         
-        const performanceMetricsEmbed = new EmbedBuilder()
-            .setColor(embedColor)
-            .setTitle('📊 Performance Metrics')
-            .addFields(
-                { name: 'EPA Rating', value: `${recentEPA !== undefined ? recentEPA.toFixed(1) : 'N/A'} ${recentEPA && recentEPA > 1.7 ? '🔥' : ''}` },
-                { name: 'Record', value: `${wins || 0}W - ${losses || 0}L` },
-                { name: 'Win Rate', value: winRateBar },
-                { name: 'Competition Experience', value: competitionExperienceValue }
-            );
-        embeds.push(performanceMetricsEmbed);
+        // Create a visually distinct separator for sections
+        const sectionSeparator = '┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈';
+        
+        // Add enhanced key performance metrics with icons and better formatting
+        // Add team ranking information if available
+        let rankInfo = '';
+        if (currentYearStats && currentYearStats.rank) {
+            rankInfo = `**🏆 Current Rank:** #${currentYearStats.rank} of ${currentYearStats.total_teams || '?'} teams\n`;
+        }
+        
+        teamInfoEmbed.addFields({
+            name: '📊 Performance Metrics',
+            value: 
+                `${rankInfo}` +
+                `**🔢 EPA Rating:** ${recentEPA !== undefined ? recentEPA.toFixed(2) : 'N/A'} ${recentEPA && recentEPA > 1.7 ? '🔥' : ''}\n`+
+                `**📝 Record:** ${wins || 0}W - ${losses || 0}L\n`+
+                `**📈 Win Rate:** ${winRateBar}\n`+
+                `**📆 Competition Experience:** ${tbaData.years ? tbaData.years.length : '1'}+ seasons\n`
+        });
         
         // Add EPA history graph with enhanced visuals
         if (epaHistoryData && epaHistoryData.length > 0) {
             const epaGraph = generateEPAGraph(epaHistoryData);
-            const performanceHistoryEmbed = new EmbedBuilder()
-                .setColor(embedColor)
-                .setTitle('📈 Performance History')
-                .setDescription(epaGraph); // EPA graph can be the description
-            embeds.push(performanceHistoryEmbed);
+            teamInfoEmbed.addFields({
+                name: '📈 Performance History',
+                value: epaGraph
+            });
         }
         
         // Add recent events with enhanced formatting and emojis for status
@@ -160,11 +166,10 @@ const handleTeamInfo = async (interaction) => {
                 return `${statusEmoji} **${event.name}**\n   📍 ${event.city}, ${event.state_prov}\n   📆 ${event.start_date} to ${event.end_date || event.start_date}`;
             }).join('\n\n');
             
-            const eventsEmbed = new EmbedBuilder()
-                .setColor(embedColor)
-                .setTitle('🏆 2025 Events')
-                .setDescription(recentEvents || 'No events for 2025 found');
-            embeds.push(eventsEmbed);
+            teamInfoEmbed.addFields({
+                name: '🏆 2025 Events',
+                value: recentEvents || 'No events for 2025 found'
+            });
         }
         
         // Add notable awards with enhanced formatting and categorization
@@ -199,25 +204,38 @@ const handleTeamInfo = async (interaction) => {
                 return `${awardEmoji} **${award.name}** (${award.year})`;
             }).join('\n');
             
-            const awardsEmbed = new EmbedBuilder()
-                .setColor(embedColor)
-                .setTitle('🏆 Notable Awards')
-                .setDescription(notableAwards || 'No awards found');
-            embeds.push(awardsEmbed);
+            teamInfoEmbed.addFields({
+                name: '🏆 Notable Awards',
+                value: notableAwards || 'No awards found'
+            });
         }
         
-        // Add social media links with formatted clickable URLs
+        // Add social media links with proper icons
         if (tbaData.social && tbaData.social.length > 0) {
-            const socialLinks = formatSocialMediaLinks(tbaData.social);
+            const socialIcons = {
+                'facebook-profile': '👥 Facebook',
+                'twitter-profile': '🐦 Twitter',
+                'youtube-channel': '📺 YouTube',
+                'instagram-profile': '📷 Instagram',
+                'github-profile': '💻 GitHub'
+            };
             
-            const socialEmbed = new EmbedBuilder()
-                .setColor(embedColor)
-                .setTitle('🌐 Social Media Channels')
-                .setDescription(socialLinks || 'No social media channels found');
-            embeds.push(socialEmbed);
+            const socialLinks = tbaData.social.map(social => {
+                const icon = socialIcons[social.type] || '🔗';
+                return `${icon}: ${social.foreign_key}`;
+            }).join('\n');
+            
+            teamInfoEmbed.addFields({
+                name: '🌐 Social Media',
+                value: socialLinks || 'No social media found'
+            });
         }
         
-        // Add enhanced buttons with better styles and descriptions
+        teamInfoEmbed.setTimestamp()
+            .setFooter({ 
+                text: `Data retrieved from TBA and Statbotics as of ${new Date().toLocaleDateString()}`,
+                iconURL: 'https://www.thebluealliance.com/images/logo_blue_background_tinythumb.gif'
+            });        // Add enhanced buttons with better styles and descriptions
         // Create buttons for more actions with improved styling
         const tbaButton = new ButtonBuilder()
             .setLabel('📊 View on The Blue Alliance')
@@ -290,13 +308,11 @@ const handleTeamInfo = async (interaction) => {
             const row2 = new ActionRowBuilder().addComponents(youtubeButton);
             buttons.push(row2);
         }
-        
-        // Send the reply with the enhanced team info embed and buttons
+          // Send the reply with the enhanced team info embed and buttons
         await interaction.editReply({
-            embeds: embeds,
+            embeds: [teamInfoEmbed],
             components: buttons
-        });
-    } catch (error) {
+        });    } catch (error) {
         console.error('Error in team info command:', error);
         
         // Enhanced error handling embed with more helpful information and troubleshooting tips

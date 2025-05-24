@@ -14,6 +14,7 @@ const client = new Client({
 // Global state variables
 let octokit;
 let latestProgrammingCommit = 'No programming commits yet.';
+global.teamInsights = {}; // Store team insights from AI
 
 // Initialize the client and octokit
 const initClient = async () => {

@@ -3,7 +3,24 @@ const { REST, Routes } = require('discord.js');
 const { DISCORD_TOKEN, CLIENT_ID, GUILD_ID } = require('../config');
 
 // Define all commands
-const commands = [
+const commands = [    {
+        name: 'team_info',
+        description: 'Displays detailed information about an FRC team',
+        options: [
+            {
+                name: 'team_number',
+                description: 'The FRC team number to look up (defaults to 201 if not specified)',
+                type: 4, // Integer type
+                required: false,
+            },
+            {
+                name: 'use_ai',
+                description: 'Whether to use AI to enhance the team information (may take longer)',
+                type: 5, // Boolean type
+                required: false,
+            }
+        ],
+    },
     {
         name: 'get_machine_ip',
         description: 'Fetches the IP address of the machine',

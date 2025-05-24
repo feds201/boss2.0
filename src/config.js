@@ -8,6 +8,8 @@ const CHANNEL_ID = process.env.CHANNEL_ID;
 const GUILD_ID = process.env.GUILD_ID;
 const CLIENT_ID = process.env.CLIENT_ID;
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+const TBA_API_KEY = process.env.TBA_API_KEY || 'your_tba_api_key';
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'your_gemini_api_key';
 
 // Credentials management
 const credsFilePath = './creds.json';
@@ -36,6 +38,8 @@ module.exports = {
     GUILD_ID,
     CLIENT_ID,
     GITHUB_TOKEN,
+    TBA_API_KEY,
+    GEMINI_API_KEY,
     credentials,
     updateCredentials
 };
